@@ -1,0 +1,22 @@
+# docker-compose syntax version
+version: "3.9"
+
+services:
+  app:
+    build:
+      # user rhe current directory we runn the docker-compose from
+      # working direcory for the following commands and for building
+      # by default it will use the found Dockerfile for building
+      context: .
+      args:
+        # development mode - see Dockerfile
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    # the default command to run - overwrites the CMD in Dockerfiles
+    # can be overwwritten by a command given as arg for docker-compose run
+    # ">" allows to specify one command in multi line format 
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
