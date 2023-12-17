@@ -20,3 +20,26 @@ services:
     # ">" allows to specify one command in multi line format 
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=devdb
+      - DB_USER=devuser
+      - DB_PASS=changeme
+    depends_on:
+      - db
+    
+  # second service: DB PostgreSQL
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - dev-db-data:/var/log/postgresql/data
+    environment:
+      - POSTGRES_DB=devdb
+      - POSTGRES_USER=devuser
+      - POSTGRES_PASSWORD=changeme
+
+# named volumes  
+volumes:
+  # if we do not specify the local folder after : then
+  # it will be stored in the default folder for volumes
+  dev-db-data:
