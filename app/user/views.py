@@ -28,7 +28,7 @@ class CreateTokenView(ObtainAuthToken):
 # with methods GET, PUT
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """Manage the logged in user"""
-    serialiazer_class = UserSerializer
+    serializer_class = UserSerializer
     authentication_classes = [authentication.TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 

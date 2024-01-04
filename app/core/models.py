@@ -2,7 +2,7 @@
 Dababase  models.
 """
 
-
+from django.conf import settings
 from django.db import models  # noqa
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -36,6 +36,8 @@ class UserManager(BaseUserManager):
         return user
 
 
+# this model is based on existing user model implemented in Djangp
+# we base it on existing userd model classes and modify it
 class User(AbstractBaseUser, PermissionsMixin):
     """User in the system"""
     email = models.EmailField(max_length=255, unique=True)
@@ -48,3 +50,20 @@ class User(AbstractBaseUser, PermissionsMixin):
     # this specifies whicj field is treated as a username
     # by default it would be username
     USERNAME_FIELD = 'email'
+
+
+# this model is created from scratch - it uses Model as the basis
+class Recipe(models.Model):
+    """Recipe object model"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    time_minutes = models.IntegerField()
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    link = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.title

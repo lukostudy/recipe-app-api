@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',  # this is a seperate django app
     'drf_spectacular',
     'user',
+    'recipe',
 ]
 
 MIDDLEWARE = [
