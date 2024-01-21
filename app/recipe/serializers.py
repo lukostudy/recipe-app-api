@@ -25,12 +25,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
         read_only_fields = ['id']
 
-    # we need to overide a standard create because the standard one
-    # does not support nested srializers - they work as read only by default
-    def create(self, validated_data):
-        """Create a recipe with nested tags list"""
-        tags = validated_data.pop('tags', [])
-        recipe = Recipe.objects.create(**validated_data)
+    # helper function that gets or creates tags
+    def _get_or_create_tags(self, tags, recipe):
         # context is passed to the serializer by the view which calls the serializer
         auth_user = self.context['request'].user
         for tag in tags:
@@ -42,9 +38,29 @@ class RecipeSerializer(serializers.ModelSerializer):
                         # ... I don't know if it's worth since the model must be modified ...?
             )
             recipe.tags.add(tag_obj)
+
+    # we need to overwrite a standard create because the standard one
+    # does not support nested srializers - they work as read only by default
+    def create(self, validated_data):
+        """Create a recipe with nested tags list"""
+        tags = validated_data.pop('tags', [])
+        recipe = Recipe.objects.create(**validated_data)
+        self._get_or_create_tags(tags, recipe)
         return recipe
 
+    # we need to overwrite the update like we did for the create method
+    def update(self, instance, validated_data):
+        """Update recipe."""
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.clear()
+            self._get_or_create_tags(tags, instance)
 
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 class RecipeDetailSerializer(RecipeSerializer):
