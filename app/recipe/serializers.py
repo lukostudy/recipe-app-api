@@ -5,13 +5,46 @@ serializers for recipe APIs
 from rest_framework import serializers
 from core.models import Recipe, Tag
 
+
+class TagSerializer(serializers.ModelSerializer):
+    """Serializer for tags"""
+
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+        read_only_fields = ['id']
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     """Serializer for recipes"""
 
+    tags = TagSerializer(many=True, required=False)
+
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'time_minutes', 'price', 'link']
+        fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
         read_only_fields = ['id']
+
+    # we need to overide a standard create because the standard one
+    # does not support nested srializers - they work as read only by default
+    def create(self, validated_data):
+        """Create a recipe with nested tags list"""
+        tags = validated_data.pop('tags', [])
+        recipe = Recipe.objects.create(**validated_data)
+        # context is passed to the serializer by the view which calls the serializer
+        auth_user = self.context['request'].user
+        for tag in tags:
+            tag_obj, created = Tag.objects.get_or_create(
+                user =auth_user,
+                **tag   # we could use name = tag['name']
+                        # but this way we could add all fields of a tag
+                        # if any is added in the future
+                        # ... I don't know if it's worth since the model must be modified ...?
+            )
+            recipe.tags.add(tag_obj)
+        return recipe
+
+
 
 
 class RecipeDetailSerializer(RecipeSerializer):
@@ -21,10 +54,3 @@ class RecipeDetailSerializer(RecipeSerializer):
         fields = RecipeSerializer.Meta.fields + ['description']
 
 
-class TagSerializer(serializers.ModelSerializer):
-    """Serializer for tags"""
-
-    class Meta:
-        model = Tag
-        fields = ['id', 'name']
-        read_only_fields = ['id']
