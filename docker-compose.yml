@@ -15,6 +15,7 @@ services:
       - "8000:8000"
     volumes:
       - ./app:/app
+      - dev-static-data:/vol/web
     # the default command to run - overwrites the CMD in Dockerfiles
     # can be overwwritten by a command given as arg for docker-compose run
     # ">" allows to specify one command in multi line format
@@ -45,3 +46,4 @@ volumes:
   # if we do not specify the local folder after : then
   # it will be stored in the default folder for volumes
   dev-db-data:
+  dev-static-data:
