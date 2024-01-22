@@ -1,4 +1,8 @@
+"""
+Test models
+"""
 
+from unittest.mock import patch
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth import get_user_model  # helper function
@@ -91,3 +95,13 @@ class ModelTests(TestCase):
 
         self.assertEqual(str(ingredient), ingredient.name)
 
+    # we are mocking with patch core.models.uuid.uuid4
+    # the patch decorator will pass the mocked object to the test fucntion
+    @patch('core.models.uuid.uuid4')
+    def test_recipe_file_name_uuid(self, mock_uuid):
+        """Test generating image path."""
+        uuid = 'test-uuid'  # a mocked unique file id
+        mock_uuid.return_value = uuid
+        file_path = models.recipe_image_file_path(None, 'example.jpg')
+
+        self.assertEqual(file_path, f'uploads/recipe/{uuid}.jpg')

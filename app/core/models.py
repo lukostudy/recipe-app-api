@@ -1,7 +1,8 @@
 """
 Dababase  models.
 """
-
+import uuid
+import os
 from django.conf import settings
 from django.db import models  # noqa
 from django.contrib.auth.models import (
@@ -9,6 +10,14 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+
+# instance willbe used by django when called for a specific
+# db cladd object ... see below how it fits into Recipe class
+def recipe_image_file_path(isntance,filename):
+    """Generate file path for a new recipe image"""
+    ext = os.path.splitext(filename)[1]
+    filename = f'{uuid.uuid4()}{ext}'
+    return os.path.join('uploads', 'recipe', filename)
 
 
 class UserManager(BaseUserManager):
@@ -66,6 +75,7 @@ class Recipe(models.Model):
     link = models.CharField(max_length=255, blank=True)
     tags = models.ManyToManyField('Tag')
     ingredients = models.ManyToManyField('Ingredient')
+    image = models.ImageField(null=True, upload_to=recipe_image_file_path)
 
     def __str__(self):
         return self.title
