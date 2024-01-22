@@ -4,7 +4,7 @@ version: "3.9"
 services:
   app:
     build:
-      # user rhe current directory we runn the docker-compose from
+      # uses the current directory we run the docker-compose from
       # working direcory for the following commands and for building
       # by default it will use the found Dockerfile for building
       context: .
@@ -17,7 +17,7 @@ services:
       - ./app:/app
     # the default command to run - overwrites the CMD in Dockerfiles
     # can be overwwritten by a command given as arg for docker-compose run
-    # ">" allows to specify one command in multi line format 
+    # ">" allows to specify one command in multi line format
     command: >
       sh -c "python manage.py wait_for_db &&
              python manage.py migrate &&
@@ -29,7 +29,7 @@ services:
       - DB_PASS=changeme
     depends_on:
       - db
-    
+
   # second service: DB PostgreSQL
   db:
     image: postgres:13-alpine
@@ -40,7 +40,7 @@ services:
       - POSTGRES_USER=devuser
       - POSTGRES_PASSWORD=changeme
 
-# named volumes  
+# named volumes
 volumes:
   # if we do not specify the local folder after : then
   # it will be stored in the default folder for volumes
