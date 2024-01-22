@@ -35,13 +35,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 
-class TagViewSet(mixins.DestroyModelMixin, # delete functionality needed only this import
-                mixins.UpdateModelMixin, #update functionality needed only this import
-                mixins.ListModelMixin,
-                viewsets.GenericViewSet): # this import should be hte last one!!!
-    """Managr tags in the database"""
-    serializer_class = serializers.TagSerializer
-    queryset = Tag.objects.all()
+class BaseRecipeAttrViewSet(
+    mixins.DestroyModelMixin, # delete functionality needed only this import
+    mixins.UpdateModelMixin, #update functionality needed only this import
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet # this import should be hte last one!!
+    ):
+    """Base class for a recipe attributes"""
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -50,17 +50,15 @@ class TagViewSet(mixins.DestroyModelMixin, # delete functionality needed only th
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
 
+
+class TagViewSet(BaseRecipeAttrViewSet): # this import should be hte last one!!!
+    """Managr tags in the database"""
+    serializer_class = serializers.TagSerializer
+    queryset = Tag.objects.all()
+
+
 # mixins.UpdateModelMixin mixins.Update adds automatically router url recipe:ingredient-detail
-class IngredientViewSet(mixins.DestroyModelMixin,
-                        mixins.UpdateModelMixin,
-                        mixins.ListModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(BaseRecipeAttrViewSet):
     """Manage ingredients in the database."""
     serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        """Filter queryset to an authenticated user"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
