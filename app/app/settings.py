@@ -152,3 +152,8 @@ AUTH_USER_MODEL = 'core.User'  # Use custom user model
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
+
+# This settings allows to upload an image through the web interface (REST Doc)
+SPECTACULAR_SETTINGS =  {
+    'COMPONENT_SPLIT_REQUEST': True
+}

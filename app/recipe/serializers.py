@@ -88,7 +88,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if ingredients is not None:
             instance.ingredients.clear()
             self._get_or_create_ingredients(ingredients, instance)
-            
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
@@ -103,3 +103,11 @@ class RecipeDetailSerializer(RecipeSerializer):
         fields = RecipeSerializer.Meta.fields + ['description']
 
 
+class RecipeImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to recipes"""
+
+    class Meta:
+        model = Recipe
+        fields = ['id', 'image']
+        read_only_fields = ['id']
+        extra_kwargs = {'image': {'required': 'True'}}
