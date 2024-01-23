@@ -9,9 +9,34 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from core.models import Recipe, Tag, Ingredient
 from recipe import serializers
+from drf_spectacular.utils import (
+    extend_schema_view,
+    extend_schema,
+    OpenApiParameter,
+    OpenApiTypes,
+)
 
 # we use ViewSet not a View, brcause VieSets have a lot of CRUD
 # operations done
+# the extend_schema_view is for the documentation used by drf_scpectacular
+@extend_schema_view(
+    list=extend_schema(  # we want extend schema for the list endpoint
+        parameters=[  # parameters that can be passed to the get request
+            OpenApiParameter(
+                'tags',
+                OpenApiTypes.STR,
+                description='Comma separated list of tags IDs [int] \
+                      to filter the get query.'
+            ),
+            OpenApiParameter(
+                'ingredients',
+                OpenApiTypes.STR,
+                description='Comma separated list of ingredients IDs [int] \
+                    to filter the get query.'
+            )
+        ]
+    )
+)
 class RecipeViewSet(viewsets.ModelViewSet):
     """ViewSet for manage recipe APIs"""
 
@@ -20,10 +45,28 @@ class RecipeViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]  # type of auth we use
     permission_classes = [IsAuthenticated]  # authentication required
 
+    def _params_to_ints(self, qs):
+        """Convert a list of strings to integers like 1,4,5,2 """
+        return [int(str_id) for str_id in qs.split(',')]
+
     def get_queryset(self):
         """Retrieve recipes for authenticated user."""
-        return self.queryset.filter(user=self.request.user).order_by('-id')
+        # return self.queryset.filter(user=self.request.user).order_by('-id')
         # self.request has authenticated user id inside
+        tags = self.request.query_params.get('tags')
+        ingredients = self.request.query_params.get('ingredients')
+        queryset = self.queryset
+        if tags:
+            tag_ids = self._params_to_ints(tags)
+            queryset = queryset.filter(tags__id__in=tag_ids)
+        if ingredients:
+            ingredient_ids = self._params_to_ints(ingredients)
+            queryset = queryset.filter(ingredients__id__in=ingredient_ids)
+
+        return queryset.filter(user=self.request.user).order_by('-id').distinct()
+        # order_by('id') standard asc order
+        # order_by('-id') reverse order
+
 
     def get_serializer_class(self):
         """Return serializer class for a request"""
