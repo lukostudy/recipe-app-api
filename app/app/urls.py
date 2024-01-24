@@ -22,8 +22,14 @@ from drf_spectacular.views import (
 from django.conf.urls.static import static
 from django.conf import settings
 
+from core import views as core_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # the healt-check url path route is added manually - not via a router
+    # please note that other API url routes are registered
+    # via the REST API router - follow the include('recipe.urls')
+    path('api/health-check/', core_views.health_check, name='health-check'),
     path('api/schema/', SpectacularAPIView.as_view(), name='api-schema'),
     path('api/docs',
          SpectacularSwaggerView.as_view(url_name='api-schema'),
